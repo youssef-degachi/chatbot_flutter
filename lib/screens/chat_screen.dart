@@ -1,10 +1,10 @@
-// screens/chat_screen.dart
+// lib/screens/chat_screen.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:file_picker/file_picker.dart';
 import '../providers/chat_provider.dart';
 import '../models/chat.dart';
-import '../services/gemini_api.dart';
+import '../services/gemini_api.dart';  // Make sure this is correct
 
 class ChatScreen extends StatelessWidget {
   final TextEditingController _controller = TextEditingController();
@@ -70,7 +70,9 @@ class ChatScreen extends StatelessWidget {
                       _controller.clear();
 
                       try {
-                        final response = await GeminiAPI.sendMessage(message);
+                        final response = await GeminiAPI.sendMessage({
+                          "prompt": message,
+                        });
                         chatProvider.addChat(
                           Chat(id: DateTime.now().toString(), message: response, isUser: false),
                         );
