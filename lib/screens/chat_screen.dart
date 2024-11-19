@@ -1,4 +1,7 @@
 // lib/screens/chat_screen.dart
+import 'dart:io';
+
+import 'package:chatbot_app/components/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:file_picker/file_picker.dart';
@@ -14,6 +17,54 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  File? _selectedFile;
+  bool _isLoading = false;
+
+  void _sendMessage(ChatProvider chatProvider) async {
+    final message = _controller.text;
+    if (message.isEmpty && _selectedFile == null) return;
+
+    setState(() { _isLoading = true; });
+    
+    // Add user message
+    chatProvider.addChat(
+      Chat(id: DateTime.now().toString(), message: message, isUser: true),
+    );
+    _controller.clear();
+
+    try {
+      String response;
+      if (_selectedFile != null) {
+        // If file is an image, use image+text API
+        response = await GeminiAPI.sendImageMessage(
+          _selectedFile!, 
+          message.isEmpty ? "Describe this image" : message
+        );
+        _selectedFile = null; // Reset selected file
+      } else {
+        // Text-only message
+        response = await GeminiAPI.sendTextMessage(message);
+      }
+
+      // Add AI response
+      chatProvider.addChat(
+        Chat(id: DateTime.now().toString(), message: response, isUser: false),
+      );
+      
+      // Scroll to bottom
+      _scrollController.animateTo(
+        _scrollController.position.maxScrollExtent,
+        duration: Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
+    } catch (e) {
+      chatProvider.addChat(
+        Chat(id: DateTime.now().toString(), message: "Error: $e", isUser: false),
+      );
+    } finally {
+      setState(() { _isLoading = false; });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,27 +101,22 @@ class _ChatScreenState extends State<ChatScreen> {
               },
             ),
           ),
+          if (_selectedFile != null)
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text('Selected File: ${_selectedFile!.path.split('/').last}'),
+            ),
+          if (_isLoading)
+            CircularProgressIndicator(),
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Row(
               children: [
-                IconButton(
-                  icon: Icon(Icons.attach_file),
-                  onPressed: () async {
-                    final result = await FilePicker.platform.pickFiles(
-                      type: FileType.custom,
-                      allowedExtensions: ['pdf', 'jpg', 'png'],
-                    );
-                    if (result != null) {
-                      final filePath = result.files.single.path;
-                      chatProvider.addChat(
-                        Chat(
-                          id: DateTime.now().toString(),
-                          message: "File selected: $filePath",
-                          isUser: true,
-                        ),
-                      );
-                    }
+                FilePickerWidget(
+                  onFileSelected: (File file) {
+                    setState(() {
+                      _selectedFile = file;
+                    });
                   },
                 ),
                 Expanded(
@@ -86,33 +132,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 ),
                 IconButton(
                   icon: Icon(Icons.send),
-                  onPressed: () async {
-                    final message = _controller.text;
-                    if (message.isNotEmpty) {
-                      chatProvider.addChat(
-                        Chat(id: DateTime.now().toString(), message: message, isUser: true),
-                      );
-                      _controller.clear();
-
-                      try {
-                        final response = await GeminiAPI.sendMessage(message);
-                        chatProvider.addChat(
-                          Chat(id: DateTime.now().toString(), message: response, isUser: false),
-                        );
-                        
-                        // Scroll to the bottom of the list
-                        _scrollController.animateTo(
-                          _scrollController.position.maxScrollExtent,
-                          duration: Duration(milliseconds: 300),
-                          curve: Curves.easeOut,
-                        );
-                      } catch (e) {
-                        chatProvider.addChat(
-                          Chat(id: DateTime.now().toString(), message: "Error: $e", isUser: false),
-                        );
-                      }
-                    }
-                  },
+                  onPressed: _isLoading ? null : () => _sendMessage(chatProvider),
                 ),
               ],
             ),
