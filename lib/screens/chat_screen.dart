@@ -1,8 +1,7 @@
 // screens/chat_screen.dart
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:file_picker/file_picker.dart'; // Import for file picker
+import 'package:file_picker/file_picker.dart';
 import '../providers/chat_provider.dart';
 import '../models/chat.dart';
 import '../services/gemini_api.dart';
@@ -35,18 +34,15 @@ class ChatScreen extends StatelessWidget {
             child: Row(
               children: [
                 IconButton(
-                  icon: Icon(Icons.attach_file), // File attachment button
+                  icon: Icon(Icons.attach_file),
                   onPressed: () async {
                     final result = await FilePicker.platform.pickFiles(
                       type: FileType.custom,
-                      allowedExtensions: ['pdf', 'jpg', 'png'], // Allow only PDFs and images
+                      allowedExtensions: ['pdf', 'jpg', 'png'],
                     );
                     if (result != null) {
-                      // You can handle the selected file here
                       final filePath = result.files.single.path;
                       print("File selected: $filePath");
-
-                      // Optionally, send the file path as a chat message
                       chatProvider.addChat(
                         Chat(
                           id: DateTime.now().toString(),
