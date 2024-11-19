@@ -34,15 +34,16 @@ class GeminiAPI {
         headers: {'Content-Type': 'application/json'},
         body: body,
       );
-
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         return data['candidates'][0]['content']['parts'][0]['text'] ?? 'No response';
       } else {
-        throw Exception('Error: ${response.statusCode}, ${response.body}');
+        // throw Exception('Error: ${response.statusCode}, ${response.body}');
+        throw Exception('Error communicating with Gemini try simple and clear task');
       }
     } catch (e) {
-      return 'Error communicating with Gemini: $e';
+      // return 'Error communicating with Gemini: $e';
+      return 'Error communicating with Gemini try simple and clear task';
     }
   }
 
@@ -84,7 +85,8 @@ class GeminiAPI {
         throw Exception('Error: ${response.statusCode}, ${response.body}');
       }
     } catch (e) {
-      return 'Error processing image: $e';
+      // return 'Error processing image: $e';
+      return 'the API is in free version try Gemini Pro';
     }
   }
 }

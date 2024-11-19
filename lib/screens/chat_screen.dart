@@ -112,13 +112,13 @@ class _ChatScreenState extends State<ChatScreen> {
             padding: const EdgeInsets.all(8.0),
             child: Row(
               children: [
-                FilePickerWidget(
-                  onFileSelected: (File file) {
-                    setState(() {
-                      _selectedFile = file;
-                    });
-                  },
-                ),
+                // FilePickerWidget(
+                //   onFileSelected: (File file) {
+                //     setState(() {
+                //       _selectedFile = file;
+                //     });
+                //   },
+                // ),
                 Expanded(
                   child: TextField(
                     controller: _controller,
