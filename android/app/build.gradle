@@ -1,44 +1,50 @@
 plugins {
-    id "com.android.application"
-    id "kotlin-android"
-    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
+    id "com.android.application" version "8.1.2" // Updated plugin version
+    id "kotlin-android" version "1.9.10" // Compatible Kotlin version
     id "dev.flutter.flutter-gradle-plugin"
 }
 
 android {
     namespace = "com.example.chatbot_app"
-    compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
+    compileSdk = 33 // Explicit compileSdk version (Update as needed)
+    ndkVersion = "25.2.9519653" // Explicit NDK version
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17 // Updated for Gradle compatibility
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_1_8
+        jvmTarget = "17" // Updated for Gradle compatibility
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.example.chatbot_app"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
-        targetSdk = flutter.targetSdkVersion
-        versionCode = flutter.versionCode
-        versionName = flutter.versionName
+        applicationId = "com.example.chatbot_app" // Unique app ID
+        minSdk = 17 // Minimum SDK version supported by Flutter
+        targetSdk = 33 // Target the latest version
+        versionCode = 1 // Increment for every new build
+        versionName = "1.0.0" // App version name
+    }
+
+    signingConfigs {
+        release {
+            storeFile file("/home/youssef/my-release-key.jks") // Path to keystore
+            storePassword "youssef" // Keystore password
+            keyAlias "key" // Key alias
+            keyPassword "youssef" // Key password
+        }
     }
 
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.debug
+            signingConfig signingConfigs.release
+            shrinkResources true // Reduce APK size
+            minifyEnabled true // Obfuscate and optimize code
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
 }
 
 flutter {
-    source = "../.."
+    source = "../.." // Path to Flutter project
 }
